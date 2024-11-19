@@ -1,0 +1,29 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    padding-top: 20px;
+}
+
+table {
+    width: 300px;
+    height: 300px;
+    border-collapse: collapse;
+    margin: auto;
+}
+
+td {
+    width: 60px;
+    height: 60px;
+    text-align: center;
+    vertical-align: middle;
+    border: 1px solid #000;
+    font-size: 18px;
+}
+
+.free {
+    background-color: #cccccc;
+}
+
+.number {
+    cursor: pointer;
+}
