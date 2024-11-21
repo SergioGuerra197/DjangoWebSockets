@@ -16,18 +16,27 @@
             <div id="bingo-card"></div>
 
             <!-- Cuadro que mostrará el número que se está generando -->
-            <div id="bingo-number">
-                <p><span id="letter">Letra: </span>
-                    <span id="random-number">Número: </span> </p>
-            </div>
         </div>
-        <di class="right">
+        <div class="right">
+            <!-- Cambié de "di" a "div" aquí -->
+            <h1>Balota</h1>
+            <div id="bingo-number">
+                <h3><span id="letter">Letra: </span><br>
+                    <span id="random-number">Número: </span> </h3>
+            </div>
             <h1>Numeros </h1>
-        </di>
+            <br>
+            <div class="generated-numbers">
+                <div id="generated-B">B: </div>
+                <div id="generated-I">I: </div>
+                <div id="generated-N">N: </div>
+                <div id="generated-G">G: </div>
+                <div id="generated-O">O: </div>
+            </div>
+        </div> <!-- Corregido aquí también -->
     </div>
 
     <script src="/frontend/index.js"></script>
-
 </body>
 
 </html>

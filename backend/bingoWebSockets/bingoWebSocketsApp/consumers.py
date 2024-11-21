@@ -87,44 +87,63 @@ class BingoConsumer(AsyncWebsocketConsumer):
         """
         Envía números aleatorios a todos los clientes conectados.
         """
-        while True:
-            # Elegir una letra aleatoria entre B, I, N, G, O
-            letter = random.choice(['B', 'I', 'N', 'G', 'O'])
+        try:
+            while True:
+                # Verificar si hay más números para enviar
+                if all(len(self.get_remaining_numbers(letter)) == 0 for letter in ['B', 'I', 'N', 'G', 'O']):
+                    print("No hay más números disponibles. Deteniendo el servidor.")
+                    print(self.generated_numbers)
+                    break  # Rompe el ciclo cuando no hay más números
 
-            # Determinar el rango de números según la letra
-            if letter == 'B':
-                number_range = range(1, 16)
-            elif letter == 'I':
-                number_range = range(16, 31)
-            elif letter == 'N':
-                number_range = range(31, 46)
-            elif letter == 'G':
-                number_range = range(46, 61)
-            else:
-                number_range = range(61, 76)
+                # Elegir una letra aleatoria entre B, I, N, G, O
+                letter = random.choice(['B', 'I', 'N', 'G', 'O'])
 
-            # Filtrar los números no generados
-            remaining_numbers = list(set(number_range) - set(BingoConsumer.generated_numbers[letter]))
+                # Elegir el rango de números para esa letra
+                number_range = self.get_number_range(letter)
 
-            # Si no quedan números por generar en esta letra, continuar con otra
-            if not remaining_numbers:
-                continue
+                # Filtrar los números que ya han sido generados
+                remaining_numbers = self.get_remaining_numbers(letter)
 
-            # Elegir un número aleatorio
-            random_number = random.choice(remaining_numbers)
+                # Si no hay números disponibles, continuar con la siguiente letra
+                if not remaining_numbers:
+                    continue
 
-            # Guardar el número generado
-            BingoConsumer.generated_numbers[letter].append(random_number)
+                # Elegir un número aleatorio
+                random_number = random.choice(remaining_numbers)
 
-            self.last_generated_number = {'letter': letter, 'number': random_number}
+                # Guardar el número generado
+                self.generated_numbers[letter].append(random_number)
 
-            # Enviar el número a todos los clientes
-            await self.send_random_number_to_group(letter, random_number)
+                self.last_generated_number = {'letter': letter, 'number': random_number}
 
-            # Esperar 5 segundos antes de enviar otro número
-            await asyncio.sleep(5)
+                # Enviar el número a todos los clientes
+                await self.send_random_number_to_group(letter, random_number,self.generated_numbers)
 
-    async def send_random_number_to_group(self, letter, random_number):
+                # Esperar antes de enviar otro número
+                await asyncio.sleep(5)
+
+        except asyncio.CancelledError:
+            print("El ciclo ha sido cancelado.")
+            return  # Permite que el servidor se detenga adecuadamente
+        
+    def get_number_range(self, letter):
+        if letter == 'B':
+            return range(1, 16)
+        elif letter == 'I':
+            return range(16, 31)
+        elif letter == 'N':
+            return range(31, 46)
+        elif letter == 'G':
+            return range(46, 61)
+        else:
+            return range(61, 76)
+        
+    def get_remaining_numbers(self, letter):
+    # Filtrar los números no generados
+        return list(set(self.get_number_range(letter)) - set(self.generated_numbers[letter]))
+
+
+    async def send_random_number_to_group(self, letter, random_number, generated_numbers):
         """
         Envía un número aleatorio con su letra correspondiente a todos los usuarios.
         """
@@ -133,7 +152,8 @@ class BingoConsumer(AsyncWebsocketConsumer):
             {
                 'type': 'receive_random_number',
                 'letter': letter,
-                'random_number': random_number
+                'random_number': random_number,
+                'generated_numbers':generated_numbers
             }
         )
 
@@ -143,5 +163,6 @@ class BingoConsumer(AsyncWebsocketConsumer):
         """
         await self.send(text_data=json.dumps({
             'letter': event['letter'],
-            'random_number': event['random_number']
+            'random_number': event['random_number'],
+            'generated_numbers': event['generated_numbers']
         }))
