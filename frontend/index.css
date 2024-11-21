@@ -1,8 +1,36 @@
 body {
     font-family: Arial, sans-serif;
-    text-align: center;
     padding-top: 20px;
+    background-color: bisque;
 }
+
+.container {
+    display: flex;
+    justify-content: space-between; /* Espaciado entre los contenedores */
+    padding: 20px;
+    height: 100vh;
+}
+
+.left {
+    flex: 1; /* Ocupa la mitad del espacio disponible */
+    padding: 20px;
+    background-color: white;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background-color:aquamarine;
+    justify-content: center;
+}
+
+
+
+.right {
+    flex: 0.5; /* Toma un 50% del espacio disponible */
+    padding: 20px;
+    background-color: white;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: center;
+}
+
 
 table {
     width: 300px;
