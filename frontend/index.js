@@ -6,6 +6,7 @@ socket.onopen = () => {
 };
 
 socket.onmessage = (event) => {
+
     const data = JSON.parse(event.data);
     console.log('Datos recibidos:', data);
     const letter = data.letter;
@@ -29,6 +30,25 @@ socket.onmessage = (event) => {
         updateGeneratedNumbers(data.generated_numbers);
     }
 
+    if (data.type === "number_status") {
+        const number = data.number;
+        const status = data.status;
+
+        // Buscar el botón correspondiente al número
+        const button = document.querySelector(`button[data-number="${number}"]`);
+
+        if (button) {
+            if (status === "generated") {
+                // Cambiar el color del botón si el número ya fue generado
+                button.style.backgroundColor = "green";
+                button.disabled = true; // Deshabilitar el botón
+            } else if (status === "not_generated") {
+                // Cambiar el color del botón si el número no ha sido generado
+                button.style.backgroundColor = "red";
+            }
+        }
+    }
+    
     // Marcar el número en la tarjeta de bingo
 };
 
@@ -82,8 +102,21 @@ function renderBingoCard(bingoCard) {
             const button = document.createElement("button");
 
             if (bingoCard[col] && bingoCard[col][row] !== undefined) {
-                // Asignar el número a la celda correspondiente
-                button.textContent = bingoCard[col][row];
+                const cellNumber = bingoCard[col][row];
+                button.textContent = cellNumber;
+
+                button.setAttribute("data-number", cellNumber);
+
+                button.addEventListener("click", () => {
+                    const number = button.getAttribute("data-number");
+
+                    // Enviar el número al servidor para validación
+                    socket.send(JSON.stringify({
+                        type: 'check_number',
+                        number: parseInt(number)
+                    }));
+                });
+
             } else {
                 button.textContent = ''; // Si no hay número, dejar vacío el botón
             }

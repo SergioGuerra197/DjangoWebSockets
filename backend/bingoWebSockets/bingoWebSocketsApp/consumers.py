@@ -4,9 +4,7 @@ import random
 from channels.generic.websocket import AsyncWebsocketConsumer
 
 class BingoConsumer(AsyncWebsocketConsumer):
-    """
-    Clase para manejar la lógica del WebSocket de Bingo.
-    """
+    
     # Variable de clase para controlar la tarea de envío de números aleatorios
     random_number_task = None
 
@@ -142,7 +140,6 @@ class BingoConsumer(AsyncWebsocketConsumer):
     # Filtrar los números no generados
         return list(set(self.get_number_range(letter)) - set(self.generated_numbers[letter]))
 
-
     async def send_random_number_to_group(self, letter, random_number, generated_numbers):
         """
         Envía un número aleatorio con su letra correspondiente a todos los usuarios.
@@ -166,3 +163,29 @@ class BingoConsumer(AsyncWebsocketConsumer):
             'random_number': event['random_number'],
             'generated_numbers': event['generated_numbers']
         }))
+
+    async def receive(self, text_data):
+
+        data = json.loads(text_data)
+        message_type = data.get("type")
+
+        if message_type == "check_number":
+            number = data.get("number")
+
+            # Verificar si el número fue generado
+            for letter, numbers in self.generated_numbers.items():
+                if number in numbers:
+                    # Responder al cliente indicando que el número ya fue generado
+                    await self.send(text_data=json.dumps({
+                        "type": "number_status",
+                        "status": "generated",
+                        "number": number
+                    }))
+                    return
+
+            # Responder al cliente indicando que el número no ha sido generado
+            await self.send(text_data=json.dumps({
+                "type": "number_status",
+                "status": "not_generated",
+                "number": number
+            }))

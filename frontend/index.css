@@ -1,7 +1,7 @@
 body {
     font-family: Arial, sans-serif;
     padding-top: 20px;
-    background-color: #586994;
+    background-color: #797B84;
     margin: 0;
     height: 100vh; /* Toma toda la altura de la ventana */
     justify-content: center;  /* Centra el contenido horizontalmente */
@@ -23,7 +23,7 @@ body {
     height: 80%;
     background-color: white;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    background-color: #A2ABAB;
+    background-color: #DBABBE;
     justify-content: center;
     border-radius: 40px 0px 0px 40px;
 }
@@ -34,7 +34,7 @@ body {
     flex: 0.5; /* Toma un 50% del espacio disponible */
     height: 80%;
     padding: 20px;
-    background-color: #E5E8B6;
+    background-color: #BAA1A7;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     display: flex;
     flex-direction: column;
@@ -47,7 +47,11 @@ table {
     height: 300px;
     border-collapse: collapse;
     margin: auto;
-    background-color: #B4C4AE;
+    background-color: #EDD2E0;
+}
+
+#bingo-card{
+    border: 100px;
 }
 
 td {
@@ -89,4 +93,8 @@ button:disabled {
 
 .free {
     background-color: #ffeb3b; /* Color especial para la casilla 'FREE' */
+}
+
+h1{
+    color: white;
 }
