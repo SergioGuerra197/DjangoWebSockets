@@ -189,3 +189,64 @@ class BingoConsumer(AsyncWebsocketConsumer):
                 "status": "not_generated",
                 "number": number
             }))
+
+        elif message_type == "bingo":
+            bingo_card = data.get("card")
+            bingo = None
+            generated_numbers_set = set(num for nums in self.generated_numbers.values() for num in nums)
+
+            # Verificar las filas
+            for row in zip(*[bingo_card[letter] for letter in ['B', 'I', 'N', 'G', 'O']]):
+                if all(num in generated_numbers_set or num == "Free" for num in row):
+                    bingo = True  # Si una fila tiene bingo, se devuelve True
+                    break  # Salir del ciclo si encontramos un bingo en las filas
+            
+            # Verificar las columnas solo si no se encontró bingo en las filas
+            if not bingo:
+                for col in bingo_card.values():
+                    if all(num in generated_numbers_set or num == "Free" for num in col):
+                        bingo = True  # Si una columna tiene bingo, se devuelve True
+                        break  # Salir del ciclo si encontramos un bingo en las columnas
+
+            # Si hay un bingo, notificar al ganador y a los demás
+            if bingo:
+                # Enviar mensaje al ganador
+                await self.send(text_data=json.dumps({
+                    "type": "bingo_winner",
+                    "winner": self.channel_name,  # El canal del ganador
+                    "message": "¡Ganaste!",  # Mensaje para el ganador
+                    "is_winner": True
+                }))
+
+                # Enviar mensaje a todos los demás jugadores (indicando que hubo un ganador)
+                await self.channel_layer.group_send(
+                    self.room_group_name,  # Nombre del grupo de WebSocket
+                    {
+                        "type": "bingo_winner",  # Tipo de mensaje
+                        "winner": self.channel_name,  # El canal del ganador
+                        "message": "Ya hubo un ganador.",  # Mensaje para los demás
+                        "is_winner": False
+                    }
+                )
+
+                # Detener cualquier tarea de números aleatorios si se genera un ganador
+                if BingoConsumer.random_number_task:
+                    BingoConsumer.random_number_task.cancel()
+                    BingoConsumer.random_number_task = None
+    
+    async def bingo_winner(self, event):
+        """
+        Notifica a todos los clientes que alguien ha ganado.
+        """
+        # Verifica si el mensaje es para el ganador o para los demás
+        if event.get("is_winner", False):
+            message = "¡Ganaste!"
+        else:
+            message = "Ya hubo un ganador."
+
+        # Enviar el mensaje al cliente que pertenece a este consumidor
+        await self.send(text_data=json.dumps({
+            "type": "bingo_winner",
+            "winner": event["winner"],  # El canal del ganador
+            "message": message  # El mensaje correspondiente
+        }))

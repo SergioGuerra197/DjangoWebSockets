@@ -1,5 +1,6 @@
 // Conectar con el WebSocket
 const socket = new WebSocket('ws://127.0.0.1:8000/ws/bingo/');
+let bingoCardGenerated = null
 
 socket.onopen = () => {
     console.log('Conectado al WebSocket');
@@ -14,6 +15,7 @@ socket.onmessage = (event) => {
 
     if(data.card){
         const bingoCard = data.card
+        bingoCardGenerated = bingoCard
         renderBingoCard(bingoCard)
     }
     // Actualizar el DOM con el número aleatorio recibido
@@ -49,7 +51,17 @@ socket.onmessage = (event) => {
         }
     }
     
-    // Marcar el número en la tarjeta de bingo
+    if (data.type === "bingo_winner") {
+        const winner = data.winner;
+        const message = data.message;
+
+        if (message === "¡Ganaste!") {
+            alert("¡Ganaste! Felicitaciones.");
+            // Aquí puedes realizar acciones como cambiar el estilo de la tarjeta para mostrar que el jugador ha ganado
+        } else {
+            alert("Ya hubo un ganador.");
+        }
+    }
 };
 
 function updateGeneratedNumbers(generatedNumbers) {
@@ -139,3 +151,14 @@ function renderBingoCard(bingoCard) {
     table.appendChild(tbody);
     bingoCardContainer.appendChild(table);
 }
+
+
+function claimBingo() {
+    socket.send(JSON.stringify({
+        type: "bingo",
+        card: bingoCardGenerated
+    }));
+}
+
+// Agregar evento al botón de cantar bingo
+document.getElementById("claim-bingo").addEventListener("click", claimBingo);

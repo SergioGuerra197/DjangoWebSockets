@@ -98,3 +98,18 @@ button:disabled {
 h1{
     color: white;
 }
+
+.claim-bingo-button {
+    margin-top: 20px;
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #4CAF50; /* Verde */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.claim-bingo-button:hover {
+    background-color: #45a049; /* Un verde más oscuro al pasar el mouse */
+}
